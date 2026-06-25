@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import polars as pl
 
 from graph_tool.all import *
 
@@ -13,7 +14,11 @@ def print_hi(name):
                  'citation_normalized_percentile','is_retracted','has_abstract','has_fulltext',
                  'language','type','open_access','field','bibliography','citations_by_year_post_pub']
 
-    df = pd.read_parquet(data_in)
+    data = pl.read_parquet(data_in)
+    #first_row = df.iloc[5]
+    print(data.row(100))
+    return
+    print("bib:" + str(first_row.bibliography))
     #column_names = df.columns.tolist()
     #print(column_names)
     #df2 = pd.read_parquet('data.parquet', columns=['user_id', 'transaction_date'])

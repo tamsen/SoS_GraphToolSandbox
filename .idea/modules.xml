@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SoS_GraphToolSandbox.iml" filepath="$PROJECT_DIR$/.idea/SoS_GraphToolSandbox.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SoS_InformationTheory.iml" filepath="$PROJECT_DIR$/.idea/SoS_InformationTheory.iml" />
     </modules>
   </component>
 </project>
