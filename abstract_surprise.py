@@ -9,10 +9,9 @@ import scipy
 
 def calculate_surprise():
 
-    #data_dir="/Users/tdunn/Data/SoS"
     data_dir = Path(__file__).parent
-    abstract_t0=os.path.join(data_dir,"data","Abstract_t0.txt")
-    abstract_t1=os.path.join(data_dir,"data","Abstract_t1.txt")
+    abstract_t0=os.path.join(data_dir,"data","Abstract_t0.txt") #past abstract
+    abstract_t1=os.path.join(data_dir,"data","Abstract_t1.txt") #present abstract
 
     testing_line = "the quick brown fox jumps over the lazy dog"
     training_line = "a fast brown fox jumps over the sleepy hound"
