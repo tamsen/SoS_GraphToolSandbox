@@ -12,8 +12,24 @@ def calculate_surprise():
 
     git_data_dir = Path(__file__).parent
     big_data_dir = "/Users/tdunn/Data/SoS"
+
     #paper_to_test = 'W2141394518' #start with 'Lorenz 1963'
-    paper_to_test = 'W119052030' #start with a random paper
+    #Resonance_of_abs_1: 0.05306456692915732
+    #Impact_of_abs_1: 20.190893536410446
+
+    #paper_to_test = 'W2126466006'# DNA 1953'
+    #Resonance_of_abs_1: 0.016267630331422415
+    #Impact_of_abs_1: 19.30601366890678
+
+    #paper_to_test = 'W2126160338'# 'Turing 1936'
+    #Resonance_of_abs_1: -0.0507787908431836
+    #Impact_of_abs_1: 17.54813453229438
+
+    #paper_to_test = 'W119052030' #start with a random paper
+    #Resonance_of_abs_1: 0.0
+    #Impact_of_abs_1: -0.1876272887712424
+    max_num_cit=10
+
 
     ThreeBreakthroughPaper_References_Citations_Path = (
         os.path.join(git_data_dir, "data", "ThreeBreakthroughPaper_References_Citations.txt"))  # future abstract
@@ -65,7 +81,6 @@ def calculate_surprise():
 
     # make a list of all the words in the abstracts of lorenz citations
     content_0_words=[]
-    max_num_cit=10
     cit_found=0
     print("looking abstracts from the paper's references..")
     for citation in focal_paper_refs:
@@ -87,7 +102,6 @@ def calculate_surprise():
     # make a list of all the words in the abstracts of focal paper references
     print("looking at the abstracts of the papers which cite the focal paper..")
     content_2_words=[]
-    max_num_cit=10
     cit_found=0
     for citation in focal_paper_cits:
         print(citation)
