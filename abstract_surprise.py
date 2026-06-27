@@ -11,10 +11,9 @@ from sentence_transformers import SentenceTransformer
 def calculate_surprise():
 
     data_dir = Path(__file__).parent
-    abstract_t0=os.path.join(data_dir,"data","Abstract_t0.txt") #past abstract
-    abstract_t1=os.path.join(data_dir,"data","Abstract_t1.txt") #present abstract
-    abstract_t2 = os.path.join(data_dir, "data", "Abstract_t2.txt")  #future abstract
-
+    #paper_to_test = 'W2141394518' #start with 'Lorenz 1963'
+    paper_to_test = 'W119052030' #start with a random paper
+    
     ThreeBreakthroughPaper_References_Citations_Path = (
         os.path.join(data_dir, "data", "ThreeBreakthroughPaper_References_Citations.txt"))  # future abstract
     RandomPaper_References_Citations_Path = (
@@ -56,24 +55,25 @@ def calculate_surprise():
             PaperTitle[line['id']] = line['title']
             PaperAbstract[line['id']] = line['abstract_inverted_index']
 
-    #start with 'Lorenz 1963'
-    Lorenz_cits = ThreeBreakthroughs_C['W2141394518']
-    Lorenz_refs = ThreeBreakthroughs_R['W2141394518']
+    if paper_to_test in InformationTheoryCases:
+        focal_paper_cits = ThreeBreakthroughs_C[paper_to_test]
+        focal_paper_refs= ThreeBreakthroughs_R[paper_to_test]
+    else:
+        focal_paper_cits = RandomPaper_C[paper_to_test]
+        focal_paper_refs = RandomPaper_R[paper_to_test]
 
     # make a list of all the words in the abstracts of lorenz citations
     content_0_words=[]
-    for citation in Lorenz_refs:
-        print(citation)
-        content_0_words = content_0_words+list(PaperAbstract["W105176998"].keys())
+    for citation in focal_paper_refs:
+        content_0_words = content_0_words+list(PaperAbstract[citation].keys())
 
     # make a list of all the words in the lorenz abstract
     content_1_words = []
-    for citation in Lorenz_cits:
-        content_1_words = content_1_words + list(PaperAbstract[citation].keys())
+    content_1_words + list(PaperAbstract[paper_to_test].keys())
 
     # make a list of all the words in the abstracts of lorenz references
     content_2_words=[]
-    for citation in Lorenz_cits:
+    for citation in focal_paper_cits:
         content_2_words = content_2_words + list(PaperAbstract[citation].keys())
 
 
