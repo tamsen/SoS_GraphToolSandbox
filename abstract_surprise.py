@@ -32,7 +32,7 @@ def calculate_surprise():
     #paper_to_test = 'W119052030' #start with a random paper
     #Resonance_of_abs_1: 0.0
     #Impact_of_abs_1: -0.1876272887712424
-    max_num_cit=10
+    max_num_cit=30
 
     output_path = (
         os.path.join(big_data_dir, "SoS_Resonance_Results.csv"))  # future abstract
@@ -79,9 +79,8 @@ def calculate_surprise():
             PaperTitle[line['id']] = line['title']
             PaperAbstract[line['id']] = line['abstract_inverted_index']
 
-    papers_to_test =['W119052030','W1986061374']
 
-    #papers_to_test=list(InformationTheoryCases.keys()) + list(RandomPaper_C.keys())
+    papers_to_test=list(InformationTheoryCases.keys()) + list(RandomPaper_C.keys())
 
     for paper_to_test in papers_to_test:
         type = "RandomPaper"
@@ -106,12 +105,13 @@ def calculate_surprise():
                 print("can't find " + citation)
             if cit_found >= max_num_cit:
                 break
-
+        content_0_line=" ".join(content_0_words)
 
         # make a list of all the words in the focal paper abstract
         print("looking at the abstract from the paper itself..")
         content_1_words = []
         content_1_words + list(PaperAbstract[paper_to_test].keys())
+        content_1_line=" ".join(content_1_words)
 
         # make a list of all the words in the abstracts of focal paper references
         print("looking at the abstracts of the papers which cite the focal paper..")
@@ -126,6 +126,7 @@ def calculate_surprise():
                 print("can't find " + citation)
             if cit_found >= max_num_cit:
                 break
+        content_2_line=" ".join(content_2_words)
 
         # sanity check, this should be zero
         kl_divergence_should_be_zero= calculate_surprise_between_two_word_lists(
@@ -138,19 +139,24 @@ def calculate_surprise():
         #how surprising is content_2 given content_1?
         Novelty_of_abs_2_given_abs_1 = calculate_surprise_between_two_word_lists(content_1_words,
                                                                                  content_2_words)
-        Novelty_of_abs_2_given_abs_0 = calculate_surprise_between_two_word_lists(content_0_words,
-                                                                                 content_2_words)
+        #Novelty_of_abs_2_given_abs_0 = calculate_surprise_between_two_word_lists(content_0_words,
+        #                                                                         content_2_words)
+
+        Novelty_of_abs_2_given_abs_0 = calculate_sematic_surprise_between_two_lines(
+            content_0_line, content_2_line)
 
         #Concepts of Transience & Resonance from
         # "Individuals, institutions, and innovation in the debates
         #        of the French Revolution" DeDeo paper
         #Note: KL divergence can be calculated severale ways.
-        # "Calculate_sematic_surprise_between_two_word_lists" is better but more expensive
-        # "calculate_sematic_surprise_between_two_lines" is cheap and goes by pure probability
+        # "calculate_sematic_surprise_between_two_lines" is better but more expensive
+        # "calculate_surprise_between_two_word_lists" is cheap and goes by pure probability
 
         # Novelty: surprise of now, given the past  (how much now is not like the past)
         # Transience: surprise of now, given the future (how much now is not like the future)
-        Transience_of_abs_1 = calculate_surprise_between_two_word_lists(content_2_words, content_1_words)
+        #Transience_of_abs_1 = calculate_surprise_between_two_word_lists(content_2_words, content_1_words)
+        Transience_of_abs_1 = calculate_sematic_surprise_between_two_lines(
+            content_2_line, content_1_line)
 
         # Resonance is novelty minus transience
         Resonance_of_abs_1 = Novelty_of_abs_1_given_abs_0-Transience_of_abs_1
@@ -208,6 +214,7 @@ def calculate_sematic_surprise_between_two_lines(testing_line, training_line):
     # 4. Calculate KL Divergence
     kl_divergence = scipy.stats.entropy(pk=p, qk=q)
     print(f"KL Divergence (Semantic): {kl_divergence:.4f}")
+    return kl_divergence
 
 
 if __name__ == '__main__':
