@@ -10,8 +10,12 @@ from sentence_transformers import SentenceTransformer
 
 def calculate_surprise():
 
+    #to do: make everything lower case...?
+    #remove strange math symbols
+
     git_data_dir = Path(__file__).parent
     big_data_dir = "/Users/tdunn/Data/SoS"
+    results= {}
 
     #paper_to_test = 'W2141394518' #start with 'Lorenz 1963'
     #Resonance_of_abs_1: 0.05306456692915732
@@ -30,6 +34,8 @@ def calculate_surprise():
     #Impact_of_abs_1: -0.1876272887712424
     max_num_cit=10
 
+    output_path = (
+        os.path.join(big_data_dir, "SoS_Resonance_Results.csv"))  # future abstract
 
     ThreeBreakthroughPaper_References_Citations_Path = (
         os.path.join(git_data_dir, "data", "ThreeBreakthroughPaper_References_Citations.txt"))  # future abstract
@@ -44,6 +50,8 @@ def calculate_surprise():
         'W2126466006': 'DNA 1953',
         'W2126160338': 'Turing 1936'
     }
+
+    papers_to_test=InformationTheoryCases.keys()
 
     ThreeBreakthroughs_R = {}
     ThreeBreakthroughs_C = {}
@@ -72,81 +80,90 @@ def calculate_surprise():
             PaperTitle[line['id']] = line['title']
             PaperAbstract[line['id']] = line['abstract_inverted_index']
 
-    if paper_to_test in InformationTheoryCases:
-        focal_paper_cits = ThreeBreakthroughs_C[paper_to_test]
-        focal_paper_refs= ThreeBreakthroughs_R[paper_to_test]
-    else:
-        focal_paper_cits = RandomPaper_C[paper_to_test]
-        focal_paper_refs = RandomPaper_R[paper_to_test]
-
-    # make a list of all the words in the abstracts of lorenz citations
-    content_0_words=[]
-    cit_found=0
-    print("looking abstracts from the paper's references..")
-    for citation in focal_paper_refs:
-        print(citation)
-        if citation in PaperAbstract:
-            content_0_words = content_0_words+list(PaperAbstract[citation].keys())
-            cit_found = cit_found + 1
+    type="RandomPaper"
+    for paper_to_test in papers_to_test:
+        if paper_to_test in InformationTheoryCases:
+            focal_paper_cits = ThreeBreakthroughs_C[paper_to_test]
+            focal_paper_refs= ThreeBreakthroughs_R[paper_to_test]
+            type = "Breakthrough"
         else:
-            print("can't find " + citation)
-        if cit_found >= max_num_cit:
-            break
+            focal_paper_cits = RandomPaper_C[paper_to_test]
+            focal_paper_refs = RandomPaper_R[paper_to_test]
+
+        # make a list of all the words in the abstracts of lorenz citations
+        content_0_words=[]
+        cit_found=0
+        print("looking abstracts from the paper's references..")
+        for citation in focal_paper_refs:
+            print(citation)
+            if citation in PaperAbstract:
+                content_0_words = content_0_words+list(PaperAbstract[citation].keys())
+                cit_found = cit_found + 1
+            else:
+                print("can't find " + citation)
+            if cit_found >= max_num_cit:
+                break
 
 
-    # make a list of all the words in the focal paper abstract
-    print("looking at the abstract from the paper itself..")
-    content_1_words = []
-    content_1_words + list(PaperAbstract[paper_to_test].keys())
+        # make a list of all the words in the focal paper abstract
+        print("looking at the abstract from the paper itself..")
+        content_1_words = []
+        content_1_words + list(PaperAbstract[paper_to_test].keys())
 
-    # make a list of all the words in the abstracts of focal paper references
-    print("looking at the abstracts of the papers which cite the focal paper..")
-    content_2_words=[]
-    cit_found=0
-    for citation in focal_paper_cits:
-        print(citation)
-        if citation in PaperAbstract:
-            content_2_words = content_2_words + list(PaperAbstract[citation].keys())
-            cit_found = cit_found + 1
-        else:
-            print("can't find " + citation)
-        if cit_found >= max_num_cit:
-            break
+        # make a list of all the words in the abstracts of focal paper references
+        print("looking at the abstracts of the papers which cite the focal paper..")
+        content_2_words=[]
+        cit_found=0
+        for citation in focal_paper_cits:
+            print(citation)
+            if citation in PaperAbstract:
+                content_2_words = content_2_words + list(PaperAbstract[citation].keys())
+                cit_found = cit_found + 1
+            else:
+                print("can't find " + citation)
+            if cit_found >= max_num_cit:
+                break
 
-    # sanity check, this should be zero
-    kl_divergence_should_be_zero= calculate_surprise_between_two_word_lists(
-        content_0_words, content_0_words)
+        # sanity check, this should be zero
+        kl_divergence_should_be_zero= calculate_surprise_between_two_word_lists(
+            content_0_words, content_0_words)
 
-    #how surprising is content_1 given content_0?
-    Novelty_of_abs_1_given_abs_0 = calculate_surprise_between_two_word_lists(content_0_words,
-                                                                             content_1_words)
+        #how surprising is content_1 given content_0?
+        Novelty_of_abs_1_given_abs_0 = calculate_surprise_between_two_word_lists(content_0_words,
+                                                                                 content_1_words)
 
-    #how surprising is content_2 given content_1?
-    Novelty_of_abs_2_given_abs_1 = calculate_surprise_between_two_word_lists(content_1_words,
-                                                                             content_2_words)
-    Novelty_of_abs_2_given_abs_0 = calculate_surprise_between_two_word_lists(content_0_words,
-                                                                             content_2_words)
+        #how surprising is content_2 given content_1?
+        Novelty_of_abs_2_given_abs_1 = calculate_surprise_between_two_word_lists(content_1_words,
+                                                                                 content_2_words)
+        Novelty_of_abs_2_given_abs_0 = calculate_surprise_between_two_word_lists(content_0_words,
+                                                                                 content_2_words)
 
-    #Concepts of Transience & Resonance from
-    # "Individuals, institutions, and innovation in the debates
-    #        of the French Revolution" DeDeo paper
-    #Note: KL divergence can be calculated severale ways.
-    # "Calculate_sematic_surprise_between_two_word_lists" is better but more expensive
-    # "calculate_sematic_surprise_between_two_lines" is cheap and goes by pure probability
+        #Concepts of Transience & Resonance from
+        # "Individuals, institutions, and innovation in the debates
+        #        of the French Revolution" DeDeo paper
+        #Note: KL divergence can be calculated severale ways.
+        # "Calculate_sematic_surprise_between_two_word_lists" is better but more expensive
+        # "calculate_sematic_surprise_between_two_lines" is cheap and goes by pure probability
 
-    # Novelty: surprise of now, given the past  (how much now is not like the past)
-    # Transience: surprise of now, given the future (how much now is not like the future)
-    Transience_of_abs_1 = calculate_surprise_between_two_word_lists(content_2_words, content_1_words)
+        # Novelty: surprise of now, given the past  (how much now is not like the past)
+        # Transience: surprise of now, given the future (how much now is not like the future)
+        Transience_of_abs_1 = calculate_surprise_between_two_word_lists(content_2_words, content_1_words)
 
-    # Resonance is novelty minus transience
-    Resonance_of_abs_1 = Novelty_of_abs_1_given_abs_0-Transience_of_abs_1
-    print("Resonance_of_abs_1:",Resonance_of_abs_1)
+        # Resonance is novelty minus transience
+        Resonance_of_abs_1 = Novelty_of_abs_1_given_abs_0-Transience_of_abs_1
+        print("Resonance_of_abs_1:",Resonance_of_abs_1)
 
-    #Impact. Is Novelty(2|1) < Novelty(2|0) ?
-    #If  abs 0 predicts the future just as well as abs 1, then abs 1 didnt have much impact!
-    Impact_of_abs_1 = Novelty_of_abs_2_given_abs_0 - Novelty_of_abs_2_given_abs_1
-    print("Impact_of_abs_1:",Impact_of_abs_1)
+        #Impact. Is Novelty(2|1) < Novelty(2|0) ?
+        #If  abs 0 predicts the future just as well as abs 1, then abs 1 didnt have much impact!
+        Impact_of_abs_1 = Novelty_of_abs_2_given_abs_0 - Novelty_of_abs_2_given_abs_1
+        print("Impact_of_abs_1:",Impact_of_abs_1)
 
+        results[paper_to_test]=[type, Resonance_of_abs_1, Impact_of_abs_1]
+
+    with open(output_path, "w") as file:
+        file.write(f"Paper,Type,Resonance,Impact\n")
+        for key, value in results.items():
+            file.write(f"{key},{value[0]},{value[1]},{value[2]}\n")
 
 def calculate_surprise_between_two_word_lists(training_words, testing_words, ):
 
