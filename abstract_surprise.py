@@ -51,7 +51,6 @@ def calculate_surprise():
         'W2126160338': 'Turing 1936'
     }
 
-    papers_to_test=InformationTheoryCases.keys()
 
     ThreeBreakthroughs_R = {}
     ThreeBreakthroughs_C = {}
@@ -80,8 +79,12 @@ def calculate_surprise():
             PaperTitle[line['id']] = line['title']
             PaperAbstract[line['id']] = line['abstract_inverted_index']
 
-    type="RandomPaper"
+    papers_to_test =['W119052030','W1986061374']
+
+    #papers_to_test=list(InformationTheoryCases.keys()) + list(RandomPaper_C.keys())
+
     for paper_to_test in papers_to_test:
+        type = "RandomPaper"
         if paper_to_test in InformationTheoryCases:
             focal_paper_cits = ThreeBreakthroughs_C[paper_to_test]
             focal_paper_refs= ThreeBreakthroughs_R[paper_to_test]
